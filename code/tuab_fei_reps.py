@@ -1,7 +1,8 @@
 """Act-0 Experiment 6 re-audit (2026-10-03): does FEI's zero-shot NMT->TUAB gain survive independent pre-training runs?
 Scores the two seeded NMT-only FEI replicates (fei_rep{1,2}_enc_cv_s0_f{k}.pt from act0_nmt_pretrain_replicate.py)
 exactly like tuab_feic.py's FEI arm (FEI@4000 mean-pooled embedding, StandardScaler + balanced LogReg, 5 fold encoders
-ensembled), next to the original run (rep0 = tuab_feic emb_fei_f{k}) and the same 3 random-init twins.
+ensembled), next to the original run (rep0 = tuab_feic emb_fei_f{k}) and the same 3 random-init twins;
+also one bootstrap that resamples the three pre-training runs and the test recordings together.
 Each TUAB file is read once and embedded by all 10 replicate encoders (51 GB of input; one pass).
 
   python tuab_fei_reps.py      # embed (GPU, resumable every 500 files) -> probe (CPU) -> runs/act0/tuab_fei_reps/
@@ -63,6 +64,19 @@ def paired(y, pa, pb, n=2000, seed=0):   # same resamples for both models; p = s
                 ci=[float(np.percentile(d, 2.5)), float(np.percentile(d, 97.5))], p_le0=float((d <= 0).mean()))
 
 
+def pooled(y, runs, pb, n=2000, seed=0):   # resample pre-training runs AND test recordings; p = share with delta <= 0
+    rng, d = np.random.RandomState(seed), []
+    for b in range(n):
+        if b % 200 == 0:
+            cool_gate(pause=80.0, resume=70.0, abort=92.0, verbose=False)
+        r, i = rng.randint(0, len(runs), len(runs)), rng.randint(0, len(y), len(y))
+        if 0 < y[i].sum() < len(i):
+            d.append(np.mean([metrics(y[i], runs[k][i])["auroc"] for k in r]) - metrics(y[i], pb[i])["auroc"])
+    d = np.array(d)
+    return dict(delta=float(np.mean([metrics(y, q)["auroc"] for q in runs]) - metrics(y, pb)["auroc"]),
+                ci=[float(np.percentile(d, 2.5)), float(np.percentile(d, 97.5))], p_le0=float((d <= 0).mean()))
+
+
 def probe(X):
     fl = TF.files()
     y = np.array([l for _, l, _ in fl]); split = np.array([s for _, _, s in fl])
@@ -89,6 +103,8 @@ def probe(X):
     res["members_above_rand_ensemble"] = f"{int((m > res['rand']['ensemble_auroc']).sum())}/{len(m)}"
     res["members_above_best_rand_member"] = f"{int((m > max(res['rand']['member_auroc'])).sum())}/{len(m)}"
     print(res["members_above_rand_ensemble"], res["members_above_best_rand_member"], flush=True)
+    res["pooled_over_runs"] = pooled(ye, [P[r].mean(0) for r in (0, 1, 2)], P["rand"].mean(0))
+    print("pooled over runs and recordings:", res["pooled_over_runs"], flush=True)
     save(f"{OUT}/results.json", res)
 
 

@@ -62,5 +62,13 @@
   }
  },
  "members_above_rand_ensemble": "14/15",
- "members_above_best_rand_member": "15/15"
+ "members_above_best_rand_member": "15/15",
+ "pooled_over_runs": {
+  "delta": 0.05225749559082904,
+  "ci": [
+   0.015750743612711414,
+   0.08989136304375173
+  ],
+  "p_le0": 0.003
+ }
 }

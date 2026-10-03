@@ -44,7 +44,7 @@ tr -d '\r' < docs/act0_repro/raw_recordings_sha256.csv | awk -F, 'NR>1{d=($1=="T
 ## Running
 
 - **Version used for the report:** the code, checkpoints and results are the commit the report's §7.2 names by its
-  full SHA; the report itself is under tag `act0-report-round15`. The earlier tag `act0-report-round14` is kept.
+  full SHA; the report itself is under tag `act0-report-round15b`. The earlier tags `act0-report-round14` and `act0-report-round15` are kept.
 - **Reproducibility:** the saved checkpoints and predictions reproduce every reported number exactly. Re-training
   reproduces them only statistically: the original FEI/GTJ runs set no seed, and cuDNN was left non-deterministic.
 
