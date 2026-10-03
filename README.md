@@ -185,8 +185,8 @@ have no GTJ partner.
 ## Notes
 
 **Version used for the report.** The report's §7.2 names the code, checkpoints and results by their full
-commit SHA. The report itself is under the tag `act0-report-round15d`; the earlier tags `act0-report-round14`,
-`act0-report-round15`, `act0-report-round15b` and `act0-report-round15c` are kept.
+commit SHA. The report itself is under the tag `act0-report-round15e`; the earlier tags `act0-report-round14`,
+`act0-report-round15`, `act0-report-round15b`, `act0-report-round15c` and `act0-report-round15d` are kept.
 
 **Why this repository is private.** Our TUAB copy came from an unofficial mirror, not through the corpus's
 data use agreement, so the TUAB numbers here are for this course submission only (report §5.5.3).
