@@ -1,0 +1,223 @@
+{
+  "n_recordings": 2417,
+  "pct_abnormal_overall": 17.17,
+  "saved_test_lists_match_StratifiedKFold_seed0": true,
+  "folds_disjoint_and_cover_all": true,
+  "first40_fold_ids": [
+    1,
+    2,
+    3,
+    0,
+    1,
+    1,
+    1,
+    4,
+    2,
+    0,
+    3,
+    1,
+    3,
+    3,
+    3,
+    0,
+    1,
+    1,
+    2,
+    2,
+    2,
+    3,
+    2,
+    0,
+    0,
+    3,
+    0,
+    4,
+    3,
+    1,
+    2,
+    3,
+    3,
+    1,
+    1,
+    0,
+    4,
+    1,
+    2,
+    2
+  ],
+  "folds": [
+    {
+      "fold": 0,
+      "n_test": 484,
+      "n_test_normal": 401,
+      "n_test_abnormal": 83,
+      "pct_abnormal": 17.15,
+      "n_train": 1933,
+      "n_test_from_eval_split": 37,
+      "auroc_FEI4000": 0.858396178229126,
+      "auroc_C": 0.8692425562599525,
+      "auroc_FEIplusC": 0.8979358831836073,
+      "encoder_ckpts": [
+        "code/fei_enc_cv_s0_f0.pt",
+        "code/branchC_h20_enc_cv_s0_f0.pt"
+      ]
+    },
+    {
+      "fold": 1,
+      "n_test": 484,
+      "n_test_normal": 401,
+      "n_test_abnormal": 83,
+      "pct_abnormal": 17.15,
+      "n_train": 1933,
+      "n_test_from_eval_split": 45,
+      "auroc_FEI4000": 0.7991166661659105,
+      "auroc_C": 0.8175044316918547,
+      "auroc_FEIplusC": 0.8486013880960249,
+      "encoder_ckpts": [
+        "code/fei_enc_cv_s0_f1.pt",
+        "code/branchC_h20_enc_cv_s0_f1.pt"
+      ]
+    },
+    {
+      "fold": 2,
+      "n_test": 483,
+      "n_test_normal": 400,
+      "n_test_abnormal": 83,
+      "pct_abnormal": 17.18,
+      "n_train": 1934,
+      "n_test_from_eval_split": 35,
+      "auroc_FEI4000": 0.8485542168674699,
+      "auroc_C": 0.8499397590361446,
+      "auroc_FEIplusC": 0.8875301204819276,
+      "encoder_ckpts": [
+        "code/fei_enc_cv_s0_f2.pt",
+        "code/branchC_h20_enc_cv_s0_f2.pt"
+      ]
+    },
+    {
+      "fold": 3,
+      "n_test": 483,
+      "n_test_normal": 400,
+      "n_test_abnormal": 83,
+      "pct_abnormal": 17.18,
+      "n_train": 1934,
+      "n_test_from_eval_split": 35,
+      "auroc_FEI4000": 0.7825,
+      "auroc_C": 0.8160542168674699,
+      "auroc_FEIplusC": 0.8365361445783134,
+      "encoder_ckpts": [
+        "code/fei_enc_cv_s0_f3.pt",
+        "code/branchC_h20_enc_cv_s0_f3.pt"
+      ]
+    },
+    {
+      "fold": 4,
+      "n_test": 483,
+      "n_test_normal": 400,
+      "n_test_abnormal": 83,
+      "pct_abnormal": 17.18,
+      "n_train": 1934,
+      "n_test_from_eval_split": 33,
+      "auroc_FEI4000": 0.808855421686747,
+      "auroc_C": 0.8256626506024097,
+      "auroc_FEIplusC": 0.8546987951807229,
+      "encoder_ckpts": [
+        "code/fei_enc_cv_s0_f4.pt",
+        "code/branchC_h20_enc_cv_s0_f4.pt"
+      ]
+    }
+  ],
+  "summary": {
+    "FEI@4000": {
+      "auroc": [
+        0.8194844965898508,
+        0.029171377555728115
+      ],
+      "auc_pr": [
+        0.5631290945434486,
+        0.04830328120075455
+      ],
+      "bal_acc": [
+        0.7290921791905778,
+        0.025233465954948887
+      ],
+      "acc": [
+        0.7426535256574782,
+        0.017187221814586994
+      ],
+      "f1": [
+        0.48594192502616257,
+        0.027512276392772973
+      ],
+      "sens": [
+        0.7084337349397589,
+        0.04902889144427904
+      ],
+      "spec": [
+        0.7497506234413965,
+        0.019382731054220788
+      ]
+    },
+    "C": {
+      "auroc": [
+        0.8356807228915664,
+        0.020715481378433293
+      ],
+      "auc_pr": [
+        0.571988193680149,
+        0.04097724457599379
+      ],
+      "bal_acc": [
+        0.7521439999399092,
+        0.032604846987378984
+      ],
+      "acc": [
+        0.7745127731293738,
+        0.017020400613871438
+      ],
+      "f1": [
+        0.5219617713570668,
+        0.036225432975156624
+      ],
+      "sens": [
+        0.7180722891566266,
+        0.06447753330245617
+      ],
+      "spec": [
+        0.786215710723192,
+        0.016825456460363732
+      ]
+    },
+    "FEI+C": {
+      "auroc": [
+        0.8650604663041191,
+        0.023569390351544095
+      ],
+      "auc_pr": [
+        0.6570341189099811,
+        0.061896591133387024
+      ],
+      "bal_acc": [
+        0.7779847669981672,
+        0.0303535582834021
+      ],
+      "acc": [
+        0.8125703677087076,
+        0.013478867617307324
+      ],
+      "f1": [
+        0.5700556708962837,
+        0.03399845266447607
+      ],
+      "sens": [
+        0.7253012048192772,
+        0.060192751791791815
+      ],
+      "spec": [
+        0.8306683291770574,
+        0.011013259395527183
+      ]
+    },
+    "gate_pass": true
+  }
+}

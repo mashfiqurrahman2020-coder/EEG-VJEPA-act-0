@@ -1,0 +1,95 @@
+{
+  "n_recordings": 2417,
+  "counts_label_split": {
+    "normal/train": 1907,
+    "normal/eval": 95,
+    "abnormal/train": 325,
+    "abnormal/eval": 90
+  },
+  "sampling_rates_found": [
+    "200.0"
+  ],
+  "n_channels_found": [
+    21
+  ],
+  "channel_lists_found": {
+    "FP1|FP2|F3|F4|C3|C4|P3|P4|O1|O2|F7|F8|T3|T4|T5|T6|FZ|PZ|CZ|A1|A2": 2417
+  },
+  "prefilter_values_found": {
+    "LP:   NaN Hz; HP:   NaN Hz; Notch: NaN": 2417
+  },
+  "physical_dimension_found": {
+    "uV": 2417
+  },
+  "all_npy_frames_equal_floor_T_over_500": true,
+  "all_npy_shapes_are_F_19_500": true,
+  "duration_s": {
+    "count": 2417.0,
+    "mean": 728.2913963591228,
+    "std": 296.992220393916,
+    "min": 3.69,
+    "10%": 480.0,
+    "25%": 596.0,
+    "50%": 701.0,
+    "75%": 851.0,
+    "90%": 984.4000000000001,
+    "max": 6748.0
+  },
+  "duration_s_median_by_label": {
+    "abnormal": 734.0,
+    "normal": 694.5
+  },
+  "n_shorter_than_20s": 8,
+  "n_shorter_than_5s": 2,
+  "n_shorter_than_300s": 66,
+  "shortest": [
+    {
+      "rid": "0000654.edf",
+      "label": "normal",
+      "split": "train",
+      "dur_s": 3.69
+    },
+    {
+      "rid": "0001858.edf",
+      "label": "normal",
+      "split": "train",
+      "dur_s": 4.615
+    },
+    {
+      "rid": "0001596.edf",
+      "label": "normal",
+      "split": "train",
+      "dur_s": 9.0
+    }
+  ],
+  "longest": [
+    {
+      "rid": "0001516.edf",
+      "label": "normal",
+      "split": "train",
+      "dur_s": 6748.0
+    },
+    {
+      "rid": "0000397.edf",
+      "label": "abnormal",
+      "split": "train",
+      "dur_s": 4538.0
+    },
+    {
+      "rid": "0000330.edf",
+      "label": "normal",
+      "split": "train",
+      "dur_s": 4535.0
+    }
+  ],
+  "total_hours": 488.9667513888889,
+  "age_median_by_label": {
+    "abnormal": 12.0,
+    "normal": 23.0
+  },
+  "gender_counts": {
+    "male": 1608,
+    "female": 808,
+    "not specified": 1
+  }
+}

@@ -1,0 +1,4 @@
+[2026-09-26 18:24:17] LANE START (waiting for lane 10, pid 443941)
+[2026-09-26 18:57:41] LANE STOPPED by trim (user): ft/scratch c60 removed; relaunching
+[2026-09-26 18:57:45] LANE START (waiting for lane 10, pid 443941)
+[2026-09-26 19:03:38] LANE CANCELLED (user: trim to necessary, finish by 21:00)
