@@ -22,6 +22,13 @@ tr -d '\r' < docs/act0_repro/checkpoints_sha256.csv | awk -F, 'NR>1 && $1!~/^pre
 tr -d '\r' < docs/act0_repro/results_sha256.csv | awk -F, 'NR>1{print $3"  "$1}' | sha256sum -c --quiet
 ```
 
+Check your copy of the recordings against `docs/act0_repro/raw_recordings_sha256.csv` (run from the folder that holds
+`data/`; folders as in `code/act0_raw_hashes.py`):
+
+```bash
+tr -d '\r' < docs/act0_repro/raw_recordings_sha256.csv | awk -F, 'NR>1{d=($1=="TUAB")?"data/TUAB/edf":($1=="NMT")?"data/NMT-Scalp-EEG":"data/zenodo_stroke"; print $4"  "d"/"$2}' | sha256sum -c --quiet
+```
+
 ## Not included
 
 - **Recordings.** NMT and the stroke cohort are public. TUAB must be requested from its maintainers under their
@@ -36,7 +43,10 @@ tr -d '\r' < docs/act0_repro/results_sha256.csv | awk -F, 'NR>1{print $3"  "$1}'
 
 ## Running
 
-- **Version used for the report:** tag `act0-report-round14`.
+- **Version used for the report:** the code, checkpoints and results are the commit the report's §7.2 names by its
+  full SHA; the report itself is under tag `act0-report-round15`. The earlier tag `act0-report-round14` is kept.
+- **Reproducibility:** the saved checkpoints and predictions reproduce every reported number exactly. Re-training
+  reproduces them only statistically: the original FEI/GTJ runs set no seed, and cuDNN was left non-deterministic.
 
 - **Environment:** Python 3.9 with `docs/act0_repro/requirements-act0.txt`. `docs/act0_repro/environment.txt`
   records the original machine.
