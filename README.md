@@ -11,7 +11,7 @@ Code, checkpoints and result records for the EEE 402 (BUET, Section G2, Group 01
 | `code/*.py` | One script per experiment (report Table 5) and per input (Table 4), plus the modules they import |
 | `code/app`, `code/src`, `code/evals`, `code/configs`, `code/setup.py` | Our copy of the EEG-VJEPA code at upstream commit `c739fad5ad57ec4439a094343901a245edf611ec`. Five files carry labelled additions, listed in Experiment 1 of the report. The CC BY-NC 4.0 licence is in `code/LICENSE` and the upstream README in `code/UPSTREAM_README.md` |
 | `code/*.pt` | Our 40 FEI/GTJ encoder checkpoints: 5 folds × {original, rep1, rep2, joint NMT+TUAB} × {FEI, GTJ} |
-| `code/runs/act0/` | Saved results (JSON), run logs, the stroke `PREREGISTRATION.md` and `POSTHOC.md` |
+| `code/runs/act0/` | Saved results (JSON), per-recording predictions (`preds_*.npz`, `oof_*.npz`, `kf5_lpo_*.npz`), run logs, the stroke `PREREGISTRATION.md` and `POSTHOC.md` |
 | `docs/act0_repro/` | Fold, subset and cohort lists; SHA-256 of every checkpoint and result file; pinned packages and environment |
 | `docs/act-0_report.md`, `docs/act0_results/`, `docs/act0_guide/` | Working notes, result analysis and the architecture guide behind the report |
 
@@ -31,7 +31,12 @@ tr -d '\r' < docs/act0_repro/results_sha256.csv | awk -F, 'NR>1{print $3"  "$1}'
   `ec98405f5f3423fd59d3296157ee1570efd8d947` into `pretrained/`. Their SHA-256 values are in
   `docs/act0_repro/checkpoints_sha256.csv`.
 
+- **Saved embeddings** (`emb_*.npz`, about 446 MB). Each is a forward pass of a checkpoint here or of a seeded
+  random-init twin, so the scripts regenerate them.
+
 ## Running
+
+- **Version used for the report:** tag `act0-report-round14`.
 
 - **Environment:** Python 3.9 with `docs/act0_repro/requirements-act0.txt`. `docs/act0_repro/environment.txt`
   records the original machine.

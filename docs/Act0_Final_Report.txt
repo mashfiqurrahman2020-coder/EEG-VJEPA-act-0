@@ -60,6 +60,10 @@ Acronyms and Notation	ii
 11.3  Experiment 5 Corrected Statistics	44
 11.4  Reproducibility Files	45
 11.5  Checks Not Run	45
+11.6  Pre-training Configuration and Commands	46
+11.7  Statistical Procedures	47
+11.8  Stroke Spectral-Matching Filter	47
+11.9  Data Used by Each Experiment	48
 Acronyms and Notation
 Acronyms and abbreviations
 Acronym
@@ -816,7 +820,7 @@ Random-init ViT-M (3 seeds)
 0.717
 0.9991
 
-The two groups don't overlap at all. The largest token std measured for the released checkpoint, on any recording, was 0.0085. The smallest measured for a random-weight twin was 0.379. That rules out measurement noise. The released EEG-VJEPA checkpoints give almost the same output for every input, on two entirely different patient populations. This is a property of the released weights themselves, not of our pipeline, our preprocessing, or which dataset we happen to test on. We even checked whether our own z-scoring convention could be doing this: per-recording and per-window normalisation give the same collapsed number (token std 0.0059, cosine 1.0000) on the same 120 recordings. It isn't us.
+The two groups don't overlap at all. The largest token std measured for the released checkpoint, on any recording, was 0.0085. The smallest measured for a random-weight twin was 0.379. That rules out measurement noise. The released EEG-VJEPA checkpoints give almost the same output for every input, on two entirely different patient populations. This is a property of the released weights themselves, not of our pipeline, our preprocessing, or which dataset we happen to test on. We even checked whether our own z-scoring convention could be doing this: per-recording and per-window normalisation give the same collapsed number (token std 0.0059, cosine 1.0000) on the same 120 recordings. It isn't us. We fixed no numeric collapse threshold in advance: the criterion is separation from every random-weight twin, and a gap of 0.0085 against 0.379 needs no threshold to read.
 That raised an obvious question: why would collapse even be possible, given that the architecture has an anti-collapse safeguard built in? Their public implementation includes a variance-hinge term, `relu(1 - std)`, that penalises the predictor's output for having too little spread across the masked patches of a clip — the same kind of safeguard that motivated FEI's own BYOL-style design. Maruf went looking in their published training configs and found a likely explanation: the exact config file that produced the released ViT-M checkpoint (`configs/pretrain/cluster_vitl16_EEG.yaml`) sets that term's weight, `reg_coeff`, to 0.0. Switched off. What's left is a plain, unnormalised L1 loss between the predictor's output and a layer-normalised target, and a plain L1 loss can be satisfied almost as cheaply by a near-constant output as by a genuinely informative one. We have not re-run their pre-training with this term switched back on, so this is the most likely explanation we found in their own code and config, not an independently re-verified causal test. What is demonstrated is the collapse itself (Table 9) and the setting in the released config; that the setting caused the collapse is a hypothesis. A second, also untested, candidate sits in the same code: pre-training saves `jepa-best`, the checkpoint with the lowest training loss, and the released file is that checkpoint (epoch 353). Under a loss that a near-constant output can satisfy, the lowest-loss checkpoint may well be the most collapsed one.
 Experiment 4 — The simplest possible probe, plus a classical baseline.
 Maybe the released features still carry some useful signal that the paper's own classifier heads just fail to extract. We tried the simplest alternative available: mean and standard deviation of the encoder's token outputs (768 numbers total), fed to a StandardScaler plus logistic regression, and, for reference, a purely classical, hand-crafted relative band-power feature set with no learned encoder at all.
@@ -915,7 +919,7 @@ rand-FEI+GTJ (random-init control)
 
 Fusion beats FEI alone and GTJ alone in every one of the five folds, a strong sign that the two branches pick up different aspects of the signal. The five training sets overlap (any two share three quarters of their recordings), so an ordinary paired t-test over folds understates the variance; every p-value in this experiment is therefore the Nadeau–Bengio corrected resampled t-test [20], Holm-adjusted [21] over the eleven comparisons of Table 20 (Appendix §11.3). The pre-trained arms there are averaged over three independent pre-training runs, the original plus two re-runs with new seeds (code/act0_nmt_pretrain_replicate.py), whose fused means were 0.865, 0.865 and 0.852. On those means fusion is ahead of FEI by +0.041 (p = 0.027) and of GTJ by +0.030 (p = 0.012 before Holm, 0.082 after). Against band power on the same folds, the fused model is ahead by +0.075 AUROC (all 5 folds, p = 0.029) and GTJ by +0.045 (all 5 folds, p = 0.027); FEI's +0.034 (4 of 5 folds) is not significant (p = 0.45). The random-init twins change how that margin should be read. An untrained fused encoder already reaches 0.834 ± 0.007, itself ahead of band power by +0.048 (all 5 folds, p = 0.026), so most of the fused model's advantage comes from its architecture and input representation. Pre-training adds +0.027 on top, better in all 5 folds but not significant once corrected (p = 0.15 before Holm, 0.45 after); the gain is +0.036 for GTJ (all 5 folds, p = 0.019 before Holm, 0.12 after) and only +0.010 for FEI (3 of 5 folds). This band-power arm is the same relative-band-power feature as Table 10's, recomputed on NMT's own 200 Hz input with its bands running from 0.5 to 45 Hz (code/baseline_bandpower.py).
 Experiment 6 — FEI+GTJ on a different hospital's data (TUAB): zero-shot and adapted.
-FEI+GTJ was built and validated entirely on NMT (Pakistan). Experiment 6 asks whether it still works on TUAB (USA): a different hospital, different hardware, a different patient population. We separate two settings. Zero-shot cross-dataset transfer: the encoder is pre-trained on NMT only and never sees a TUAB recording, labelled or not, before its frozen features are probed. Target-domain unlabelled adaptation: the encoder is re-pre-trained on NMT plus TUAB's unlabelled training recordings (never the eval set, never a label) and then probed the same way. In both settings the linear probe is fitted on TUAB's labelled training subsets and scored on the 276-recording eval set, exactly as in Experiment 4.
+FEI+GTJ was built and validated entirely on NMT (Pakistan). Experiment 6 tests it on TUAB (USA): a different hospital, different hardware, a different patient population. We separate two settings. Zero-shot cross-dataset transfer: the encoder is pre-trained on NMT only and never sees a TUAB recording, labelled or not, before its frozen features are probed. Target-domain unlabelled adaptation: the encoder is re-pre-trained on NMT plus TUAB's unlabelled training recordings (never the eval set, never a label) and then probed the same way. In both settings the linear probe is fitted on TUAB's labelled training subsets and scored on the 276-recording eval set, exactly as in Experiment 4.
 Table 12 reports both settings. FEI's zero-shot row is the clean transfer test. GTJ does not survive the shift zero-shot: it falls below its own random-init twin (0.840 vs 0.863 full-train AUROC), consistent with TUAB's differently filtered spectrum being out of distribution for an encoder trained on NMT's. The adapted rows therefore re-pre-train GTJ, and the FEI inside the adapted fused model, on NMT plus TUAB's unlabelled training recordings. The zero-shot FEI and the FEI inside the adapted fused model are two separately pre-trained encoders, rather than the same weights reused. An untrained encoder is the same in both settings, so each random-init row serves as the control for both.
 Table 12: Experiment 6 — frozen FEI, GTJ and FEI+GTJ on TUAB. Zero-shot rows are pre-trained on NMT only; adapted rows on NMT plus TUAB's unlabelled training recordings. Matched random-init controls for every arm; full-train operating point (BAcc/AUC-PR/Sens/Spec at the default 0.5 threshold) alongside AUROC.
 Features
@@ -1260,7 +1264,7 @@ Joint review and rehearsal
 7.1 Executive Summary
 A recently published AI model, EEG-VJEPA, claimed to automatically tell healthy brain recordings apart from abnormal ones by adapting a video-understanding technique to EEG. Our team tested this claim and found that the publicly released version does not actually work as described: it gives almost the same answer for every patient. We could show this directly. We built two smaller models instead: one for frequency content and one for how a signal's rhythm changes over time. Together they beat a simple classical measurement on the dataset they were trained on (an untrained copy of the same design already does most of that) and match an established clinical measurement on a third task: telling stroke patients apart from healthy volunteers. On a different hospital's data, the frequency model's training still helped on its own; the combined model needed that hospital's unlabelled recordings too, and there it only matched the released model.
 7.2 Reproducing Our Results
-All code, saved model checkpoints, and saved per-recording predictions used to produce every number, table, and figure in this report are organized as a set of scripts, one per experiment (Table 5). Table 4 gives the script behind each experiment's input. The 200 Hz NMT copy that FEI and GTJ read (per-channel z-scored at NMT's native rate, stored as 2.5-second frames) was first written in August 2026 by a script that was not kept; we reconstructed its recipe as code/preprocess_nmt_200hz.py, which reproduces all 2,417 stored files byte for byte. From those inputs, pre-train an encoder (`fei_pretrain.py` or `fei_branchC.py`, both with a `--selftest` flag for a fast sanity check with no real data and a `--cv` flag for the full five-fold cross-validation reported here), score it with `feic_nmt_anchor.py` (Experiment 5) or `tuab_feic.py` (Experiment 6), and evaluate a frozen or fine-tuned released checkpoint with the corresponding `tuab_*_eval.py` script. Every long-running script checkpoints its progress after each cross-validation fold and can be safely re-run to resume after an interruption, and each accepts command-line flags for every experiment variant reported here. The code is in github.com/mashfiqurrahman2020-coder/EEG-VJEPA-act-0; its docs/act0_repro/ folder holds the fold, subset and cohort lists, the SHA-256 of every checkpoint and result file, and the pinned environment (Appendix §11).
+All code, saved model checkpoints, and saved per-recording predictions used to produce every number, table, and figure in this report are organized as a set of scripts, one per experiment (Table 5). Table 4 gives the script behind each experiment's input. The 200 Hz NMT copy that FEI and GTJ read (per-channel z-scored at NMT's native rate, stored as 2.5-second frames) was first written in August 2026 by a script that was not kept; we reconstructed its recipe as code/preprocess_nmt_200hz.py, which reproduces all 2,417 stored files byte for byte. From those inputs, pre-train an encoder (`fei_pretrain.py` or `fei_branchC.py`, both with a `--selftest` flag for a fast sanity check with no real data and a `--cv` flag for the full five-fold cross-validation reported here), score it with `feic_nmt_anchor.py` (Experiment 5) or `tuab_feic.py` (Experiment 6), and evaluate a frozen or fine-tuned released checkpoint with the corresponding `tuab_*_eval.py` script. Every long-running script checkpoints its progress after each cross-validation fold and can be safely re-run to resume after an interruption, and each accepts command-line flags for every experiment variant reported here. The code is in github.com/mashfiqurrahman2020-coder/EEG-VJEPA-act-0; its docs/act0_repro/ folder holds the fold, subset and cohort lists, the SHA-256 of every checkpoint and result file, and the pinned environment (Appendix §11). The version used for this report is the repository's tag act0-report-round14: git clone https://github.com/mashfiqurrahman2020-coder/EEG-VJEPA-act-0.git, then git checkout act0-report-round14, then pip install -r docs/act0_repro/requirements-act0.txt under Python 3.9. Appendix §11.6 gives the pre-training commands and §11.9 the data each experiment uses.
 8 Project Management and Cost Analysis (PO(k))
 8.1 Computational Resources Used
 This software project has no physical bill of materials. Compute was the resource budget. All pre-training and evaluation ran on a locally-owned workstation with one consumer-grade GPU (NVIDIA RTX 5060 Ti); we used no paid cloud compute. The direct monetary cost was the workstation's electricity. The practical cost that mattered day to day was time and thermal headroom: every script in this project is gated by a shared hardware guard that pauses training if CPU temperature rises above a safe threshold, which shaped how many experiments (and how many random-init control seeds) we could fit into the term.
@@ -1328,7 +1332,7 @@ Our 33 result files
 size and SHA-256 of each in docs/act0_repro/results_sha256.csv
 
 11.2 Stroke Cohort: Pre-registration, Post-hoc Input and Fold-local Check
-The stroke analysis was pre-registered in a local file, runs/act0/phaseB/PREREGISTRATION.md, written on 2026-09-25 at 23:55 (UTC+6) before any LOSO run. stroke_phaseB.py refuses to run its LOSO stage without that file and stores its SHA-256 (c66463066a4f3dc50e21cf82f3debc2c5d5b1ae4d8ac6ec1502e9617ba8d7321) in every result. It is a timestamped file in our own working copy, not an entry in a public registry, so it records our order of work without proving it to an outsider. Under the pre-registered input, FEI+GTJ scored 0.833 LOSO AUROC, against 0.889 for its random-init twin and 0.907 for BSI. The spectral-matching input of Experiment 8 was designed after that result: its recipe, gates and comparisons were written to runs/act0/phaseB_clean/POSTHOC.md on 2026-09-26 at 19:06 (SHA-256 f78446790f0e7d19e6d87f3c1ffd6265fe42f1d3e50612d5a4a84f3f588529c8) before any LOSO run on that input, so every Experiment 8 number is post-hoc in that sense. Its filter is fitted once, without labels, on all 15 subjects pooled, so each held-out subject helps shape the filter applied to it. To check that this does not drive the result, stroke_phaseB_foldlocal.py refits the filter inside every LOSO fold on the 14 training subjects only and applies it unchanged to the held-out one. Table 19 compares the two.
+The stroke analysis was pre-registered in a local file, runs/act0/phaseB/PREREGISTRATION.md, written on 2026-09-25 at 23:55 (UTC+6) before any LOSO run. stroke_phaseB.py refuses to run its LOSO stage without that file and stores its SHA-256 (c66463066a4f3dc50e21cf82f3debc2c5d5b1ae4d8ac6ec1502e9617ba8d7321) in every result. It is a timestamped file in our own working copy, not an entry in a public registry, so it records our order of work without proving it to an outsider. Under the pre-registered input, FEI+GTJ scored 0.833 LOSO AUROC, against 0.889 for its random-init twin and 0.907 for BSI. The spectral-matching input of Experiment 8 was designed after that result: its recipe, gates and comparisons were written to runs/act0/phaseB_clean/POSTHOC.md on 2026-09-26 at 19:06 (SHA-256 f78446790f0e7d19e6d87f3c1ffd6265fe42f1d3e50612d5a4a84f3f588529c8) before any LOSO run on that input, so every Experiment 8 number is post-hoc in that sense. Its filter is fitted once, without labels, on all 15 subjects pooled, so each held-out subject helps shape the filter applied to it. To check that this does not drive the result, stroke_phaseB_foldlocal.py refits the filter inside every LOSO fold on the 14 training subjects only and applies it unchanged to the held-out one. Table 19 compares the two. The pre-registration also fixes both cohorts. The primary cohort takes, for every subject, the same 285 s of pure rest before any task marker (the shortest rest block, PAC05's, is 285.0 s): stroke PAC02–PAC10 (9) against the dataset authors' own six controls. PAC01 and controls 02 and C01 are left out because they have at most 52 s of rest before the task. The sensitivity cohort follows the authors' definition, the first 300 s of every file (10 stroke, 8 controls); for PAC01, 02 and C01 that window includes task data, so it is reported as a sensitivity check only.
 Table 19: Stroke primary cohort, LOSO AUROC with the spectral-matching filter fitted on all 15 subjects pooled (Experiment 8) or refitted inside each fold on the 14 training subjects. BSI alone (0.907) uses no filter.
 Arm
 Pooled filter (Experiment 8)
@@ -1508,4 +1512,101 @@ TUAB numbers are restricted to this submission (§5.5.3); a licensed evaluation 
 A container image (e.g. Docker)
 Not built in the time available.
 docs/act0_repro/ pins all 111 Python packages and records Python, PyTorch, CUDA, cuDNN, GPU driver and OS (Table 18).
+Per-file SHA-256 of the raw recordings
+Not computed. The recordings are not ours to redistribute, so the manifests identify them by recording ID.
+Fold, subset and cohort membership by recording ID (Table 21) and the script behind each input (Table 4).
+Saved embeddings (emb_*.npz, about 446 MB)
+Too large for the repository; each is a forward pass of a published checkpoint or of a seeded random-init twin.
+The repository holds the per-recording predictions (preds_*.npz, oof_*.npz, kf5_lpo_*.npz, 7.3 MB) behind every reported score, plus the checkpoints that regenerate the embeddings.
+
+11.6 Pre-training Configuration and Commands
+Every encoder pre-trained for this report uses the recipe below. None of the runs uses a learning-rate schedule, mixed precision, gradient clipping or PyTorch's deterministic-algorithm flags, and each keeps its final (60th) epoch's weights, with no checkpoint selection. cuDNN kernels were left non-deterministic, so even the seeded runs are not bit-identical on a re-run. Random-init twins are built from the same architectures with torch seed = twin index (seeds 0–2 on TUAB and stroke, 0–4 on NMT).
+Table 23: Pre-training data, seeds, recipe and command for every encoder trained in this report. All share AdamW (learning rate 2×10⁻⁴, weight decay 10⁻⁴), batch 128, 60 epochs, 4 random windows per recording per epoch, d = 256, h = 128 and target EMA 0.996.
+Encoders
+Pre-training data and seeds
+Window and branch settings
+Command and checkpoints
+FEI, NMT only (Experiments 5, 6, 8)
+The NMT training folds of the seed-0 5-fold split (Table 21); no seed set (the original runs are unseeded)
+L = 1,000 samples (5 s at 200 Hz)
+python code/fei_pretrain.py --cv → fei_enc_cv_s0_f{k}.pt
+GTJ, NMT only (Experiments 5, 8)
+As for FEI; no seed set
+L = 4,000 (20 s), STFT n_fft 200, hop 100, context 60%, GRU
+python code/fei_branchC.py --cv --L 4000 --hop 100 --tag h20 → branchC_h20_enc_cv_s0_f{k}.pt
+FEI and GTJ replicates 1 and 2 (Experiment 5, Table 20)
+As above; torch, NumPy and Python random seeded with 100 × replicate + fold
+As above
+python code/act0_nmt_pretrain_replicate.py
+FEI and GTJ, joint NMT+TUAB (Experiment 6)
+NMT training fold k plus TUAB's 2,717 unlabelled training recordings; torch seed = k
+As above
+python code/feic_joint.py → fei_joint_enc_cv_s0_f{k}.pt, branchC_h20_joint_enc_cv_s0_f{k}.pt
+
+11.7 Statistical Procedures
+Table 24: The statistical test behind each kind of comparison in this report.
+Comparison
+Procedure
+Where used
+Confidence interval of one model's AUROC or BAcc
+Percentile bootstrap over test recordings (subjects on stroke), 2,000 resamples, seed 0, 2.5th–97.5th percentiles (code/act0_metrics.py)
+Experiments 4, 6, 8
+Two models on the same test set (Δ AUROC)
+Paired bootstrap: both models scored on the same 2,000 resamples; CI from the percentiles of Δ, and p = share of resamples with Δ ≤ 0 (one-sided)
+Experiments 6 and 8 (e.g. FEI+GTJ − ViT-M on TUAB, p = 0.147)
+Released vs random-weight ViT-M across the five training subsets
+Two-sided Mann–Whitney U on the per-subset AUROCs
+Experiments 1 and 4
+Two arms on the same NMT folds
+Paired t-test over the 5 folds; Appendix §11.3 repeats all eleven with the Nadeau–Bengio corrected t-test and Holm's adjustment
+Experiment 5 (Table 20)
+Stroke: one arm against chance
+Label permutation, the full LOSO re-run for each of 1,000 shuffles; p = (1 + #null ≥ observed) / 1,001
+Experiments 7 and 8
+Stroke: robustness to the split
+100 repeats of stratified 5-fold with the same splits for every arm (win rate = share of repeats arm A beats arm B; permutation p from 200 shuffles × 10 repeats); leave-pair-out with a stratified 2,000-resample bootstrap over subjects
+Experiment 8 (Table 15, Figure 19)
+Stroke: classical features, stroke vs control
+Two-sided Mann–Whitney U; the pre-declared gate is broadband BSI at p < 0.05
+Experiment 7 (Table 13)
+
+Only Experiment 5's eleven NMT comparisons are adjusted for multiplicity (Holm, Table 20). The stroke pre-registration fixed the gate and three paired comparisons, all involving the released ViT-M (ViT-M+BSI vs BSI, ViT-M vs its random twin, FEI+GTJ vs ViT-M) on the pre-registered input; Experiment 8's comparisons on the spectrum-matched input were fixed in POSTHOC.md before any LOSO run on that input, but after the pre-registration. Every other p-value in this report is exploratory and unadjusted: evidence about that one comparison, not a claim about the whole family.
+11.8 Stroke Spectral-Matching Filter
+Experiment 8's input is built by code/stroke_phaseB_clean.py, following runs/act0/phaseB_clean/POSTHOC.md, which was written before any LOSO run on this input. Each recording gets the dataset authors' bad-channel interpolation, a common average reference, the 19 NMT channels (T7/T8/P7/P8 renamed T3/T4/T5/T6), resampling to 200 Hz with no band-pass, and a per-channel z-score. The target is NMT's mean log10 Welch spectrum over 100 fixed-random NMT training recordings (first 300 s; 800-sample Welch segments, i.e. 0.25 Hz bins; 10⁻²⁰ added before the log).
+The filter is a log10 amplitude gain per channel on that 0.25 Hz grid. It starts at zero and is updated four times: shape every subject, z-score again, average the cohort's log-spectra, and add half the remaining gap to NMT's. Shaping multiplies the recording's FFT by the gain, linearly interpolated onto the FFT's frequency grid with no smoothing; the gain is real, so the filter changes no phase (zero-phase). Each recording is reflect-padded by 800 samples at both ends before the FFT and trimmed after it. The result is z-scored again and cut into non-overlapping 2.5 s frames.
+One filter per channel is fitted on all 15 subjects pooled, without labels, and the same filter is applied to every subject (Experiment 8); Table 19 refits it inside each LOSO fold on the 14 training subjects. Four gates were fixed in POSTHOC.md and reported whether or not they passed: the matched cohort's mean log-spectrum within 0.25 decades of NMT's at every channel and bin from 0.5 to 99 Hz; GTJ's input BatchNorm |z| at most 1.5 in every 1 Hz bin, against each NMT checkpoint's running statistics; GTJ's across-subject embedding spread at least half its spread on 15 NMT evaluation recordings; and at most 5% of its embedding dimensions constant (std < 10⁻⁵). All four passed (§5.3.3).
+11.9 Data Used by Each Experiment
+Table 25: Which recordings each experiment's encoder was pre-trained on, which trained its classifier, and which scored it. No evaluation recording is used for pre-training or probe training.
+Experiment
+Encoder pre-training
+Classifier training
+Evaluation
+1, 2, 4
+Released ViT-M: the authors' own pre-training; random-weight twins: none
+TUAB, the five 546-recording training subsets and (Experiment 4) the full 2,717-recording training set; Experiment 2 fine-tunes the whole network on the same subsets
+TUAB official eval set (276)
+3
+Released ViT-M and its random-weight twins
+None (no classifier)
+TUAB recordings and the 15-subject stroke cohort (Table 9)
+5
+FEI, GTJ: the NMT training folds of the seed-0 5-fold split (≈1,934 recordings), labels unused
+The same NMT training fold, with labels
+The held-out NMT fold (≈483 recordings)
+6, FEI row
+The five NMT-only fold encoders of Experiment 5
+As Experiment 4 (TUAB training subsets)
+TUAB official eval set (276)
+6, GTJ and FEI+GTJ rows
+NMT training fold plus TUAB's 2,717 unlabelled training recordings
+As Experiment 4
+TUAB official eval set (276)
+7
+None (BSI and spectral features)
+LOSO: the other 14 stroke-cohort subjects
+The held-out subject, all 15 in turn
+8
+The NMT-only fold encoders of Experiment 5; released ViT-M
+LOSO: the other 14 subjects, after the spectral-matching filter (§11.8)
+The held-out subject; also 100× repeated 5-fold and leave-pair-out
 
