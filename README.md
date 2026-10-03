@@ -191,6 +191,10 @@ commit SHA. The report itself is under the tag `act0-report-round15d`; the earli
 **Why this repository is private.** Our TUAB copy came from an unofficial mirror, not through the corpus's
 data use agreement, so the TUAB numbers here are for this course submission only (report §5.5.3).
 
-**Licence.** The EEG-VJEPA code in `code/app`, `code/src`, `code/evals` and `code/configs` is under CC BY-NC
-4.0 (`code/LICENSE`); the upstream README is `code/UPSTREAM_README.md`. Five of its files carry labelled
-additions of ours, listed in the report's Experiment 1.
+**Licence.** Our own code and documents are under the MIT licence ([LICENSE](LICENSE)). The EEG-VJEPA code in
+`code/app`, `code/src`, `code/evals`, `code/configs` and `code/setup.py` is not ours and stays under its own CC BY-NC 4.0
+licence ([code/LICENSE](code/LICENSE)), which MIT cannot override, so anything that runs that code is for
+non-commercial use only. The upstream README is `code/UPSTREAM_README.md`; five of its files carry labelled additions
+of ours, listed in the report's Experiment 1. The licence covers our work, not the datasets: NMT, TUAB and the stroke
+cohort keep their own terms, and the checkpoints and results that used our TUAB copy are for this course submission
+only (see above).
