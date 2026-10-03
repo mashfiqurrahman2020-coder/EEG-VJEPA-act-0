@@ -91,7 +91,7 @@ fold; on TUAB and the stroke cohort the five are ensembled.
 | 4. Linear probe on the released ViT-M | 0.838 on the full training set, still not separable from a random-weight twin |
 | 5. FEI+GTJ on NMT, 5-fold | 0.865 ± 0.024 (mean of three pre-training runs 0.861), against band power 0.786; an untrained twin already reaches 0.834, so pre-training adds +0.027, not significant after correction |
 | 6. TUAB, encoders pre-trained on NMT only | FEI beats its random-weight twin by +0.048 AUROC averaged over five pre-training runs (95% CI [0.015, 0.108]); GTJ does not transfer (0.840 against its twin's 0.863) |
-| 6. TUAB, re-pre-trained with TUAB's unlabelled recordings | FEI+GTJ 0.862 against the released ViT-M's 0.838 (not significant), and no better than its own twin in any of three pre-training runs |
+| 6. TUAB, re-pre-trained with TUAB's unlabelled recordings | FEI+GTJ 0.862 against the released ViT-M's 0.838 (not significant), and not significantly better than its own twin in any of three pre-training runs; FEI on its own stays above its twin in all three (+0.038 averaged, 95% CI [−0.0003, 0.104]) |
 | 7. BSI on the stroke cohort | 0.907 AUROC |
 | 8. FEI+GTJ on the stroke cohort | 0.926 leave-one-subject-out AUROC (two seed re-runs: 0.963, 0.981), after a spectral-matching step designed post hoc on this cohort; 15 subjects cannot separate it from BSI |
 
@@ -185,8 +185,8 @@ have no GTJ partner.
 ## Notes
 
 **Version used for the report.** The report's §7.2 names the code, checkpoints and results by their full
-commit SHA. The report itself is under the tag `act0-report-round15c`; the earlier tags `act0-report-round14`,
-`act0-report-round15` and `act0-report-round15b` are kept.
+commit SHA. The report itself is under the tag `act0-report-round15d`; the earlier tags `act0-report-round14`,
+`act0-report-round15`, `act0-report-round15b` and `act0-report-round15c` are kept.
 
 **Why this repository is private.** Our TUAB copy came from an unofficial mirror, not through the corpus's
 data use agreement, so the TUAB numbers here are for this course submission only (report §5.5.3).
