@@ -54,13 +54,14 @@ def main():
            for f in sorted(os.listdir(f"{SUBS}/s{s}/train/{lab}"))])
     write("stroke_cohorts.csv", ["cohort", "subject", "label_stroke", "rest_seconds"],
           [(c, s, int(s.startswith("PAC")), secs) for c, (subs, secs) in COHORTS.items() for s in subs])
-    ck = sorted(glob.glob(f"{ROOT}/pretrained/*.pth.tar")) + sorted(
+    ck = sorted(glob.glob(f"{ROOT}/pretrained/eeg_vjepa_*.pth.tar")) + sorted(   # the two released checkpoints only
         p for pat in ("fei_enc_cv_s0_f*", "branchC_h20_enc_cv_s0_f*", "fei_joint_enc_cv_s0_f*",
-                      "branchC_h20_joint_enc_cv_s0_f*", "fei_rep*_enc_cv_s0_f*", "branchC_h20_rep*_enc_cv_s0_f*")
+                      "branchC_h20_joint_enc_cv_s0_f*", "fei_rep*_enc_cv_s0_f*", "branchC_h20_rep*_enc_cv_s0_f*",
+                      "fei_joint_rep*_enc_cv_s0_f*", "branchC_h20_joint_rep*_enc_cv_s0_f*")
         for p in glob.glob(f"{ROOT}/code/{pat}.pt"))
     write("checkpoints_sha256.csv", ["file", "bytes", "sha256"], [(os.path.relpath(p, ROOT), os.path.getsize(p), sha(p)) for p in ck])
     res = sorted(glob.glob(f"{ROOT}/code/runs/act0/**/*.json", recursive=True)) + sorted(glob.glob(f"{ROOT}/code/runs/act0/*.json"))
-    write("results_sha256.csv", ["file", "bytes", "sha256"], [(os.path.relpath(p, ROOT), os.path.getsize(p), sha(p)) for p in dict.fromkeys(res)])
+    write("results_sha256.csv", ["file", "bytes", "sha256"], [(os.path.relpath(p, ROOT), os.path.getsize(p), sha(p)) for p in dict.fromkeys(res) if "/liu2024_feic/" not in p])   # Act-2 run, not Act 0
     freeze = subprocess.run([PY, "-m", "pip", "freeze"], capture_output=True, text=True).stdout
     open(f"{OUT}/requirements-act0.txt", "w").write(freeze)
     import torch
